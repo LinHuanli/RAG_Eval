@@ -1,0 +1,96 @@
+# Default configuration for the Financial RAG Evaluation System
+
+# API settings
+api:
+  base_url: "https://openrouter.ai/api/v1"
+  model: "anthropic/claude-3.7-sonnet"
+  key: ""  # Should be provided via environment variable or command line
+
+# Data paths
+data:
+  raw_dir: "./data/raw"
+  processed_dir: "./data/processed"
+  qa_pairs_dir: "./data/qa_pairs"
+  docs_path: "./data/processed/fin_docs.json"
+  output_path: "./data/qa_pairs/test.json"
+
+# Retrieval settings
+retrieval:
+  method: "bm25"
+  top_k: 10
+  # BM25 specific parameters
+  bm25:
+    k1: 1.5
+    b: 0.75
+
+# Generation settings
+generation:
+  num_samples: 30
+  max_page_id: 294
+  # QA generation prompts
+  prompts:
+    qa_generation: |
+      Based on the following content, identify an important information point and create an English question about it, then provide the corresponding answer.
+      Note: Please do not mention any page numbers or paragraph information, just focus on important knowledge or information points.
+
+      Content:
+      {content}
+
+      Please provide your response in JSON format:
+      ```json
+      {{
+        "question": "Your question here",
+        "answer": "Your answer here"
+      }}
+      ```
+
+      Please directly provide the JSON object, do not include any other words.
+    
+    rag_prompt: |
+      You are a helpful assistant that answers the following question based on the potiential helpful documents.
+
+      Question: {question}
+
+      Retrieved documents:
+      {context}
+
+      Now, please directly provide a concise and accurate answer to the question: "{question}".
+      Do not output any other words except the answer.
+
+# Evaluation settings
+evaluation:
+  metrics:
+    - "Retrieval_Recall@1"
+    - "Retrieval_Recall@5"
+    - "Retrieval_Recall@10"
+    - "Retrieval_MRR"
+    - "Answer_F1"
+    - "Answer_Factuality"
+  prompts:
+    factuality_prompt: |
+      Please analyze the factual accuracy of a generated answer compared to a reference answer for the following question:
+
+      Question: {question}
+
+      Reference Answer: {reference_answer}
+
+      Generated Answer: {generated_answer}
+
+      Instructions:
+      1. First, identify all important factual points in the reference answer.
+      2. Then, determine which of these factual points are correctly included in the generated answer.
+      3. Calculate the proportion of reference facts that are correctly included in the generated answer.
+
+      Please provide your analysis in the following JSON format:
+      {{
+        "total_reference_facts": <number>,
+        "facts_included_in_generated": <number>,
+        "factuality_score": <ratio between 0 and 1>
+      }}
+
+      Only output the JSON, nothing else.
+
+# Logging settings
+logging:
+  level: "INFO"
+  file: "./logs/rag_eval.log"

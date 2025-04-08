@@ -1,0 +1,8 @@
+{
+  "Retrieval_Recall@1": 0.6333333333333333,
+  "Retrieval_Recall@5": 0.9,
+  "Retrieval_Recall@10": 0.9666666666666667,
+  "Retrieval_MRR": 0.7617063492063492,
+  "Answer_F1": 0.3442445171577105,
+  "Answer_Factuality": 0.7403333333333334
+}
